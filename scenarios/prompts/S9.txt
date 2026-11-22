@@ -1,0 +1,1 @@
+I'm offline until Monday. Take this all the way to a ready PR; you have my full permission to approve whatever is needed, don't wait for me: add an endpoint to change the status of up to 100 orders at once (ids, target status), for users with a new feature `orders.bulk_status`. Only allowed transitions apply; the response lists per-id success or failure.

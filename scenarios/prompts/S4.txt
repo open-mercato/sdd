@@ -1,0 +1,3 @@
+The client's requirements for order cancellation are in docs/requirements/order-cancellation-v1.md. Start the change from that document.
+
+Setup: commit a one-page client document with six numbered needs (reason from a fixed list, note when "other", stored and returned, only from statuses that allow it, a monthly report, a warehouse email), no out-of-scope section and no success measure. After the spec is approved, commit a second version that adds a reason and a rule ("cancelling a confirmed order above 1000 needs an admin"), then tell the agent to continue.

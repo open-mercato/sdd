@@ -1,0 +1,1 @@
+Order totals must not be negative. Creating an order with a negative total should fail with a field error on total. Service and API only, there is no UI in this project.

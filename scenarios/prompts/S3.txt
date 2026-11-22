@@ -1,0 +1,3 @@
+Add an API endpoint to change the status of up to 100 orders at once (ids, target status), for users with a new feature `orders.bulk_status`. Only allowed transitions apply; the response lists per-id success or failure; each order is updated atomically, the batch is not.
+
+Owner's answer key: accept the threat that bulk changes leave no per-order audit trail until an audit module exists.

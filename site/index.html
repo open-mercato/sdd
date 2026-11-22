@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Open Mercato SDD — Spec-first AI engineering</title>
+<meta name="description" content="A spec-first AI engineering workflow, built on Open Mercato skills.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Open Mercato brand tokens */
+:root{
+  --black:#0D0D0D; --ink:#1B1B1B; --muted:#6A6A6A; --pale:#A9A9A9;
+  --line:#E2E2E2; --line-soft:#ECECEC; --fill:#F7F7F7; --page:#FFFFFF;
+  --green:#B4F372; --green-text:#5F8F2F; --yellow:#EEFB63; --violet:#BC9AFF;
+  --gradient:linear-gradient(90deg,#BC9AFF,#EEFB63 55%,#B4F372);
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+.eyebrow{font:500 11px/1.4 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;margin:0}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
+
+/* Header */
+.header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line-soft)}
+.header .wrap{height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em;color:var(--black);white-space:nowrap}
+.logo svg{width:22px;height:25px;flex:none}
+.logo small{font:500 10px var(--mono);letter-spacing:.16em;color:var(--pale);margin-left:2px}
+.nav{display:flex;align-items:center;gap:28px;font-size:14px;font-weight:500}
+.nav a:not(.btn){color:var(--muted)}
+.nav a:not(.btn):hover{color:var(--black)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid var(--black);background:var(--black);color:#fff;font-size:14px;font-weight:600;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+.btn:hover{background:#2c2c2c}
+.btn-ghost{background:transparent;color:var(--black);border-color:var(--line)}
+.btn-ghost:hover{background:var(--fill)}
+.btn-green{background:var(--green);border-color:var(--green);color:var(--black)}
+.btn-green:hover{background:#c5f78f}
+
+/* Hero */
+.hero{padding:96px 0 88px}
+.hero h1{font-size:clamp(44px,8.4vw,92px);line-height:1;letter-spacing:-.045em;font-weight:600;color:var(--black);margin:26px 0 28px}
+.hero h1 mark{background:linear-gradient(transparent 62%,var(--green) 62%);color:inherit}
+.lead{font-size:clamp(17px,2vw,20px);line-height:1.55;color:var(--muted);max-width:620px;margin:0 0 34px}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.status{font:400 12px/1.6 var(--mono);color:var(--pale);margin:30px 0 0}
+
+/* Sections */
+.section{padding:88px 0;border-top:1px solid var(--line-soft)}
+.section h2{font-size:clamp(30px,4.6vw,48px);line-height:1.08;letter-spacing:-.035em;font-weight:600;color:var(--black);margin:16px 0 14px}
+.section h2::after{content:'';display:block;width:56px;height:3px;border-radius:2px;background:var(--gradient);margin-top:22px}
+.section .intro{color:var(--muted);max-width:560px;margin:0 0 44px;font-size:17px}
+
+/* Workflow graphic */
+.flowwrap{position:relative;margin-top:84px}
+.track{position:absolute;top:27px;left:var(--a,7%);width:var(--len,86%);height:2px;background:var(--line);border-radius:2px}
+.track .fill{display:block;height:100%;width:var(--p,0px);background:var(--black);border-radius:2px;transition:width .7s cubic-bezier(.6,0,.2,1),height .35s ease}
+.flow{position:relative;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(8,1fr)}
+.flow li{display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;min-width:0}
+.dot{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;padding:0;position:relative;transition:background .35s,border-color .35s,box-shadow .35s}
+.dot svg{width:24px;height:24px;fill:none;stroke:var(--pale);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:stroke .35s}
+.flow li:hover .dot{border-color:var(--black)}
+.flow li.done .dot{background:var(--green);border-color:var(--green)}
+.flow li.done .dot svg{stroke:var(--black)}
+.flow li.active .dot{background:var(--black);border-color:var(--black);box-shadow:0 0 0 6px rgba(180,243,114,.55);animation:pulse 2.4s ease-in-out infinite}
+.flow li.active .dot svg{stroke:var(--green)}
+@keyframes pulse{50%{box-shadow:0 0 0 11px rgba(180,243,114,.22)}}
+.label{margin-top:16px;display:flex;flex-direction:column;gap:3px}
+.label .num{font:500 10px var(--mono);letter-spacing:.16em;color:var(--pale)}
+.label .name{font-size:14.5px;font-weight:600;letter-spacing:-.015em;color:var(--muted);transition:color .3s}
+.flow li.active .name,.flow li.done .name{color:var(--black)}
+.label .opt{font:400 10px var(--mono);color:var(--pale);letter-spacing:.04em}
+.flow .body{display:none}
+.loop{position:absolute;top:-30px;left:calc(100%/8*1.5);width:calc(100%/8);height:22px;border:1.5px dashed var(--violet);border-bottom:0;border-radius:60px 60px 0 0;pointer-events:none}
+.loop::before{content:'';position:absolute;left:-5.5px;bottom:-7px;border:5px solid transparent;border-top:7px solid var(--violet);border-bottom:0}
+.loop span{position:absolute;left:50%;top:-24px;transform:translateX(-50%);white-space:nowrap;font:500 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#7A5FD0}
+
+.panel{margin-top:44px;border:1px solid var(--line);border-radius:14px;padding:36px;min-height:236px}
+.panel .in{display:grid;grid-template-columns:1.15fr 1fr;gap:48px;align-items:center}
+.panel .in.swap{animation:swap .45s ease}
+@keyframes swap{from{opacity:0;transform:translateY(8px)}}
+.body h3{font-size:clamp(22px,2.6vw,30px);line-height:1.15;letter-spacing:-.03em;font-weight:600;color:var(--black);margin:10px 0 10px}
+.body p{color:var(--muted);margin:0;font-size:16px;max-width:460px}
+.body .step{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--green-text)}
+.body dl{margin:0;background:var(--black);border-radius:10px;padding:8px 20px;font-family:var(--mono)}
+.body dl div{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:baseline;padding:13px 0;border-top:1px solid #222}
+.body dl div:first-child{border-top:0}
+.body dt{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7d7d7d}
+.body dd{margin:0;font-size:13px;color:#cfcfcf;overflow-wrap:anywhere}
+.body dd.cmd{color:#fff;font-size:15px}
+.body dd.cmd::before{content:'/';color:var(--green)}
+.footnote{font:400 12px/1.7 var(--mono);color:var(--muted);margin:20px 0 0}
+
+@media(max-width:760px){
+  .flowwrap{margin-top:36px}
+  .loop{display:none}
+  .track{top:var(--a,24px);left:23px;width:2px;height:var(--len,90%)}
+  .track .fill{width:100%;height:var(--p,0px)}
+  .flow{grid-template-columns:1fr;gap:34px}
+  .flow li{display:grid;grid-template-columns:48px 1fr;column-gap:18px;text-align:left;align-items:start;cursor:default}
+  .dot{width:48px;height:48px;grid-row:1/3}
+  .dot svg{width:21px;height:21px}
+  .label{margin:3px 0 0;flex-direction:row;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .label .name{font-size:19px}
+  .flow .body{display:block;grid-column:2;margin-top:6px}
+  .body h3,.body .step{display:none}
+  .body p{font-size:15px}
+  .body dl{margin-top:12px;padding:0;background:none}
+  .body dl div{grid-template-columns:76px 1fr;padding:4px 0;border:0}
+  .body dt{color:var(--pale)}
+  .body dd{color:var(--muted);font-size:12.5px}
+  .body dd.cmd{color:var(--black);font-size:13.5px;font-weight:500}
+  .body dd.cmd::before{color:var(--green-text)}
+  .panel{display:none}
+}
+
+/* Principles */
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+.why h3{font-size:19px;letter-spacing:-.02em;font-weight:600;color:var(--black);margin:0 0 8px;display:flex;gap:10px;align-items:baseline}
+.why h3::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);flex:none;transform:translateY(-2px)}
+.why p{font-size:15px;color:var(--muted);margin:0}
+
+/* FAQ */
+.faq{border-top:1px solid var(--line)}
+details{border-bottom:1px solid var(--line);padding:20px 0}
+summary{cursor:pointer;list-style:none;font-size:17px;font-weight:600;color:var(--black);display:flex;justify-content:space-between;align-items:center;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font:400 22px var(--mono);color:var(--pale)}
+details[open] summary::after{content:'−'}
+details p{font-size:15.5px;color:var(--muted);max-width:680px;margin:12px 0 0}
+code{font:500 .88em var(--mono);background:var(--fill);border:1px solid var(--line-soft);border-radius:5px;padding:2px 6px;color:var(--ink)}
+
+.skill summary{align-items:flex-start}
+.sk{display:flex;flex-direction:column;gap:6px;min-width:0}
+.sk code{align-self:flex-start;font-size:14px;background:var(--black);color:#fff;border-color:var(--black);padding:4px 9px}
+.sd{font-size:15.5px;font-weight:400;color:var(--muted);line-height:1.45}
+.skill ol{margin:16px 0 0;padding:0 0 0 22px;max-width:640px;color:var(--ink);font-size:15.5px}
+.skill ol li{padding:3px 0 3px 4px}
+.skill ol li::marker{font:500 12px var(--mono);color:var(--pale)}
+.skill .leaves{font:400 12px var(--mono);color:var(--muted);margin:14px 0 2px}
+
+/* Closing + footer */
+.closing{background:var(--black);color:#fff;padding:96px 0}
+.closing .eyebrow{color:#8a8a8a}
+.closing h2{font-size:clamp(38px,6.4vw,72px);line-height:1.02;letter-spacing:-.045em;font-weight:600;margin:20px 0 18px}
+.closing h2 span{background:var(--gradient);-webkit-background-clip:text;background-clip:text;color:transparent}
+.closing p:not(.eyebrow){color:#a9a9a9;max-width:480px;margin:0 0 32px;font-size:17px}
+.footer{background:var(--black);color:#8a8a8a;border-top:1px solid #222;padding:28px 0;font-size:13px}
+.footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.footer .logo{color:#fff;font-size:15px}
+.footer nav{display:flex;gap:22px}
+.footer a:hover{color:#fff}
+
+:focus-visible{outline:2px solid var(--black);outline-offset:3px;border-radius:4px}
+.closing :focus-visible,.footer :focus-visible{outline-color:var(--green)}
+
+@media(max-width:900px){
+  .why{grid-template-columns:1fr;gap:28px}
+}
+@media(max-width:600px){
+  .wrap{padding:0 20px}
+  .nav a:not(.btn){display:none}
+  .logo small{display:none}
+  .hero{padding:64px 0 60px}
+  .section{padding:64px 0}
+  .closing{padding:72px 0}
+  .actions .btn{flex:1 1 100%}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="om-grad" x1="149.654" y1="-51.5487" x2="-4.80765" y2="160.609" gradientUnits="userSpaceOnUse">
+      <stop offset="0.122" stop-color="#B4F372"/><stop offset="0.584" stop-color="#EEFB63"/><stop offset="1" stop-color="#BC9AFF"/>
+    </linearGradient>
+    <symbol id="om-symbol" viewBox="0 0 147 166"><path fill-rule="evenodd" clip-rule="evenodd" d="M70.0489 0.883659C72.2073 -0.306134 74.8099 -0.288634 76.9683 0.901028L103.555 15.6125L104.06 15.9483C106.418 17.7325 106.244 21.5379 103.543 23.029L77.3128 37.5494C74.9662 38.8515 73.501 41.3592 73.5 44.0917V75.3455C73.5 75.348 73.502 75.3499 73.5044 75.3499C73.5077 75.3499 73.5098 75.3533 73.5083 75.3563L73.5015 75.37C73.5005 75.372 73.5 75.3743 73.5001 75.3765C73.5783 79.3446 76.8711 82.0439 80.3865 79.6429C80.3891 79.6411 80.3923 79.64 80.3955 79.64H80.3992C80.4011 79.64 80.4028 79.6408 80.4041 79.6421C80.4063 79.6443 80.4097 79.6448 80.4125 79.6433L108.234 64.2512C109.493 63.5652 111.02 63.5731 112.277 64.2628L144.778 82.2396C146.148 82.9954 147 84.4575 147 86.0492V124.707C147 126.299 146.149 126.157 144.778 126.912C121.61 139.731 98.5252 152.694 75.3605 165.518C74.2104 166.161 72.8226 166.161 71.6568 165.518L4.0023 129.338C1.54504 128.084 0.000266378 125.511 0 122.698V87.8845C0 85.151 1.4656 82.639 3.81281 81.3364L32.9429 65.2412C35.2905 63.9387 36.7615 61.4269 36.7615 58.6931V23.5617C36.7615 20.8119 38.2397 18.2987 40.603 16.9962L70.0489 0.883659ZM75.3145 84.9086C72.8696 84.2171 70.0903 85.3793 69.7389 85.5339C69.7215 85.5439 69.7047 85.5589 69.6872 85.5686L40.5743 101.681C38.227 102.984 36.7618 105.49 36.7615 108.223C36.7615 118.536 36.699 140.654 36.6983 140.918C36.6999 141.733 36.9683 143.112 38.5875 143.922C39.8675 144.554 41.2905 143.927 42.1764 143.367C42.3409 143.274 62.834 131.762 71.6568 126.878C72.8068 126.235 74.1947 126.235 75.3605 126.878L103.963 142.715C103.966 142.717 103.97 142.718 103.974 142.718C103.977 142.718 103.981 142.719 103.985 142.721C108.212 145.195 110.256 140.918 110.256 138.636V106.377C110.256 104.786 109.408 103.323 108.039 102.567L80.4021 87.2708C80.2335 87.1774 80.0749 87.0738 79.9255 86.9639C79.0833 86.4659 77.237 85.4528 75.3145 84.9086Z"/></symbol>
+  </defs>
+</svg>
+
+<header class="header">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Open Mercato SDD home">
+      <svg fill="#0D0D0D" aria-hidden="true"><use href="#om-symbol"/></svg>
+      <span>Open Mercato</span><small>SDD</small>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#workflow">Workflow</a>
+      <a href="#skills">Skills</a>
+      <a href="#why">Why</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn" href="https://github.com/open-mercato/skills" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow"><i></i>Spec-driven development</p>
+      <h1>Specify it.<br>Mock it up.<br><mark>Ship it.</mark></h1>
+      <p class="lead">A spec-first workflow for building with AI agents. Agree on one spec, review a high-fidelity mockup, then ship code that is verified against both.</p>
+      <div class="actions">
+        <a class="btn" href="#workflow">See how it works</a>
+        <a class="btn btn-ghost" href="https://github.com/open-mercato/skills" target="_blank" rel="noopener">Explore the skills ↗</a>
+      </div>
+      <p class="status">Preview · nine skills and one state script</p>
+    </div>
+  </section>
+
+  <section class="section" id="workflow">
+    <div class="wrap">
+      <p class="eyebrow"><i></i>Workflow</p>
+      <h2>Eight steps. One path.</h2>
+      <p class="intro">Each step is one skill and leaves one artifact behind. The next step builds on it.</p>
+      <div class="flowwrap" id="flow">
+        <div class="track"><span class="fill"></span></div>
+        <div class="loop" aria-hidden="true"><span>Feedback updates the spec</span></div>
+        <ol class="flow">
+        <li>
+          <button class="dot" type="button" aria-label="Step 1: Discover"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="14" cy="14" r="9"/><path d="m21 21 8 8"/></svg></button>
+          <div class="label"><span class="num">01</span><span class="name">Discover</span></div>
+          <div class="body">
+            <div><span class="step">01 / Discover</span><h3>One initiative, one page.</h3><p>Scope a single initiative: outcome, problem, rules and the slices it ships in. Requirements you already have are indexed, not rewritten.</p></div>
+            <dl><div><dt>Skill</dt><dd class="cmd">om-sdd-discover</dd></div><div><dt>Produces</dt><dd>brief.md</dd></div><div><dt>Gate</dt><dd>Owner confirms scope</dd></div></dl>
+          </div>
+        </li>
+        <li>
+          <button class="dot" type="button" aria-label="Step 2: Spec + Plan"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 3h13l6 6v20H8zM21 3v7h6M12 17h11M12 22h9"/></svg></button>
+          <div class="label"><span class="num">02</span><span class="name">Spec + Plan</span></div>
+          <div class="body">
+            <div><span class="step">02 / Spec + Plan</span><h3>One spec that contains the plan.</h3><p>Behavior as numbered acceptance criteria, design decisions and phased steps in one document. Open questions are answered before design starts.</p></div>
+            <dl><div><dt>Skill</dt><dd class="cmd">om-sdd-spec</dd></div><div><dt>Produces</dt><dd>spec.md</dd></div><div><dt>Gate</dt><dd>No open questions · human approval</dd></div></dl>
+          </div>
+        </li>
+        <li>
+          <button class="dot" type="button" aria-label="Step 3: Mockup"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="4" width="26" height="24" rx="2"/><path d="M3 10h26m-17 5 9 5-9 5z"/></svg></button>
+          <div class="label"><span class="num">03</span><span class="name">Mockup</span><span class="opt">UI changes only</span></div>
+          <div class="body">
+            <div><span class="step">03 / Mockup</span><h3>See it before it is built.</h3><p>A high-fidelity, clickable mockup built from your app’s real components. Reviewers click any element to comment and the agent picks the comments up.</p></div>
+            <dl><div><dt>Skill</dt><dd class="cmd">om-sdd-mockup</dd></div><div><dt>Produces</dt><dd>mockup/ · feedback.md</dd></div><div><dt>Gate</dt><dd>No open comments · human approval</dd></div></dl>
+          </div>
+        </li>
+        <li>
+          <button class="dot" type="button" aria-label="Step 4: Secure"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="6" y="14" width="20" height="14" rx="2"/><path d="M10 14V10a6 6 0 0 1 12 0v4M16 20v3"/></svg></button>
+          <div class="label"><span class="num">04</span><span class="name">Secure</span></div>
+          <div class="body">
+            <div><span class="step">04 / Secure</span><h3>Model the threats before the code.</h3><p>New attack surface, threats per element and per criterion, a decision for each. Every mitigation becomes a security criterion with a required test.</p></div>
+            <dl><div><dt>Skill</dt><dd class="cmd">om-sdd-secure</dd></div><div><dt>Produces</dt><dd>security.md</dd></div><div><dt>Gate</dt><dd>Every threat decided · accepted risks need a human</dd></div></dl>
+          </div>
+        </li>
+        <li>
+          <button class="dot" type="button" aria-label="Step 5: Validate"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 3 12 5v9c0 7-5 11-12 13C9 28 4 24 4 17V8z"/><path d="m10 16 4 4 8-9"/></svg></button>
+          <div class="label"><span class="num">05</span><span class="name">Validate</span></div>
+          <div class="body">
+            <div><span class="step">05 / Validate</span><h3>Check the work before implementation.</h3><p>A read-only check of the spec against the real codebase, the compatibility rules, the approved mockup and the security controls.</p></div>
+            <dl><div><dt>Skill</dt><dd class="cmd">om-sdd-validate</dd></div><div><dt>Produces</dt><dd>validation.md</dd></div><div><dt>Gate</dt><dd>Verdict: go or conditional</dd></div></dl>
+          </div>
+        </li>
+        <li>
+          <button class="dot" type="button" aria-label="Step 6: Implement"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m12 7-9 9 9 9m8-18 9 9-9 9M18 4l-4 24"/></svg></button>
+          <div class="label"><span class="num">06</span><span class="name">Implement</span></div>
+          <div class="body">
+            <div><span class="step">06 / Implement</span><h3>Build against the agreed artifacts.</h3><p>One plan step at a time on its own branch, a test for every acceptance and security criterion, UI built from the approved mockup.</p></div>
+            <dl><div><dt>Skill</dt><dd class="cmd">om-sdd-implement</dd></div><div><dt>Produces</dt><dd>Pull request</dd></div><div><dt>Gate</dt><dd>All steps done · recorded green gate</dd></div></dl>
+          </div>
+        </li>
+        <li>
+          <button class="dot" type="button" aria-label="Step 7: Verify"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m5 10 4 4 5-7M18 10h11M5 23l4 4 5-7M18 23h11"/></svg></button>
+          <div class="label"><span class="num">07</span><span class="name">Verify</span></div>
+          <div class="body">
+            <div><span class="step">07 / Verify</span><h3>Verify what actually shipped.</h3><p>Independent review and QA. Every criterion gets evidence: a passing test or a browser walkthrough.</p></div>
+            <dl><div><dt>Skill</dt><dd class="cmd">om-sdd-verify</dd></div><div><dt>Produces</dt><dd>verify.md</dd></div><div><dt>Gate</dt><dd>Every criterion has evidence</dd></div></dl>
+          </div>
+        </li>
+        <li>
+          <button class="dot" type="button" aria-label="Step 8: Archive"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="4" width="22" height="24" rx="2"/><path d="M5 11h22M11 18h10m-10 5h7"/></svg></button>
+          <div class="label"><span class="num">08</span><span class="name">Archive</span></div>
+          <div class="body">
+            <div><span class="step">08 / Archive</span><h3>Keep the system knowledge current.</h3><p>Fold the change into the living capability specs and the threat model, in the same pull request as the code.</p></div>
+            <dl><div><dt>Skill</dt><dd class="cmd">om-sdd-archive</dd></div><div><dt>Produces</dt><dd>capabilities/*.md · threat model</dd></div><div><dt>Gate</dt><dd>A human merges</dd></div></dl>
+          </div>
+        </li>
+        </ol>
+      </div>
+      <div class="panel" id="panel"><div class="in body"></div></div>
+      <p class="footnote">↳ State, gates, test runs and evidence checks live in one script with no model involved. Approvals and the merge belong to a human.</p>
+    </div>
+  </section>
+
+  <section class="section" id="skills">
+    <div class="wrap">
+      <p class="eyebrow"><i></i>Skills</p>
+      <h2>Nine skills. One job each.</h2>
+      <p class="intro">What the agent does inside each skill, in order. One entry point, then one skill per step.</p>
+      <div class="faq skills">
+        <details class="skill" open><summary><span class="sk"><code>om-sdd</code><span class="sd">Sets up the repository, starts a change and says what runs next.</span></span></summary>
+          <ol><li>Vendors the state script and the conventions into the repository</li><li>Creates the change folder and its state file</li><li>Reads the state and names the next skill, or what blocks it</li><li>Hands the approval commands to a human and never approves itself</li></ol>
+          <p class="leaves">Leaves <code>.ai/sdd/ · change.json</code></p></details>
+        <details class="skill"><summary><span class="sk"><code>om-sdd-discover</code><span class="sd">Turns a request into a one-page brief for one initiative.</span></span></summary>
+          <ol><li>Reads the request, linked issues and the affected code before asking anything</li><li>Asks only the two or three questions that could change scope</li><li>Writes one page: outcome, problem, scope, rules and slices</li><li>Tags every claim as evidence or as an assumption</li><li>With existing requirements: indexes the document instead of interviewing, lists what it leaves unanswered, and pins its version</li><li>Gets a skeptical read from a fresh-context agent, then confirms scope with the owner</li></ol>
+          <p class="leaves">Leaves <code>brief.md</code></p></details>
+        <details class="skill"><summary><span class="sk"><code>om-sdd-spec</code><span class="sd">Writes one spec that contains its own implementation plan.</span></span></summary>
+          <ol><li>Loads the brief, the code and the capability specs the change touches</li><li>Writes a skeleton with open questions and stops for answers</li><li>Describes behavior as numbered acceptance criteria</li><li>Plans phases and steps, each naming its criteria and its test</li><li>Has a fresh-context agent review it, then waits for human approval</li></ol>
+          <p class="leaves">Leaves <code>spec.md</code></p></details>
+        <details class="skill"><summary><span class="sk"><code>om-sdd-mockup</code><span class="sd">Builds a high-fidelity mockup from the real design system and collects comments.</span></span></summary>
+          <ol><li>Finds the app’s real components, tokens and closest existing screens</li><li>Builds every screen and state as a dev-only route with fixture data</li><li>Tags elements so each maps to a screen, a name and a criterion</li><li>Adds the review overlay: press C, click any element, comment</li><li>Fixes cosmetic comments and sends anything that changes behavior back to the spec</li></ol>
+          <p class="leaves">Leaves <code>mockup/ · feedback.md</code></p></details>
+        <details class="skill"><summary><span class="sk"><code>om-sdd-secure</code><span class="sd">Threat-models the change and turns every mitigation into a required test.</span></span></summary>
+          <ol><li>Reads the approved spec, the living threat model and how the code authenticates, scopes and validates today</li><li>Describes the attack surface the change adds: entry points, data, trust boundaries</li><li>Finds threats twice: STRIDE per element, then an abuse case per acceptance criterion</li><li>Decides each threat: mitigate with a named control, or accept, which only a human can approve</li><li>Writes a security criterion for every mitigation, in the same form as acceptance criteria</li><li>Has a fresh-context agent attack the design, then records the result</li></ol>
+          <p class="leaves">Leaves <code>security.md</code></p></details>
+        <details class="skill"><summary><span class="sk"><code>om-sdd-validate</code><span class="sd">Checks readiness before any code is written.</span></span></summary>
+          <ol><li>Runs the deterministic traceability check</li><li>Looks up every module, route and entity the spec names in the real code</li><li>Checks backward compatibility and the repository’s own rules</li><li>Confirms that the mockup and the spec agree, and that every security control exists or is planned</li><li>Returns go, conditional or no-go with evidence, and changes nothing</li></ol>
+          <p class="leaves">Leaves <code>validation.md</code></p></details>
+        <details class="skill"><summary><span class="sk"><code>om-sdd-implement</code><span class="sd">Implements the approved spec step by step on a resumable pull request.</span></span></summary>
+          <ol><li>Works on its own branch and opens a draft pull request after the first commit</li><li>Takes one plan step at a time and records each with its commit, so an interrupted run resumes</li><li>Pins current behavior with a test before changing it, and writes a test for every acceptance and security criterion</li><li>Builds UI from the approved mockup, with the same components</li><li>Runs the full validation gate; the script refuses “done” without a green run for the current code</li><li>Stops and reports when the code cannot match the spec</li></ol>
+          <p class="leaves">Leaves <code>Pull request</code></p></details>
+        <details class="skill"><summary><span class="sk"><code>om-sdd-verify</code><span class="sd">Reviews and tests the pull request against the spec and the mockup, with evidence per criterion.</span></span></summary>
+          <ol><li>Reviews from a context that did not write the code, and never fixes it</li><li>Starts from deterministic diff signals: removed exports, destructive migrations, code without tests, silenced checks</li><li>Runs the validation gate itself instead of trusting reported results</li><li>Walks every UI criterion in a real browser and compares each screen with the approved mockup</li><li>Builds the evidence table: every acceptance and security criterion needs a test or a screenshot</li><li>Returns pass or fail by rule: any blocker, or any unwaived major, fails</li></ol>
+          <p class="leaves">Leaves <code>verify.md</code></p></details>
+        <details class="skill"><summary><span class="sk"><code>om-sdd-archive</code><span class="sd">Folds the change into the living description of the system.</span></span></summary>
+          <ol><li>Applies added, changed and removed requirements to the capability specs</li><li>Folds new threats, controls and accepted risks into the living threat model</li><li>Does it on the pull request branch, so the description becomes true at merge</li><li>Removes mockup routes and fixtures from application code</li><li>Closes the change and leaves the merge to a human</li></ol>
+          <p class="leaves">Leaves <code>capabilities/*.md</code></p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="why">
+    <div class="wrap">
+      <p class="eyebrow"><i></i>Why it works</p>
+      <h2>Less rework. More confidence.</h2>
+      <p class="intro">Three rules keep the process small.</p>
+      <div class="why">
+        <div><h3>One spec, one plan</h3><p>Requirements, architecture and tasks live in a single document. No competing planning docs.</p></div>
+        <div><h3>Mockup before code</h3><p>A high-fidelity mockup replaces the separate UX design phase and becomes an acceptance artifact.</p></div>
+        <div><h3>Evidence, not promises</h3><p>Review and QA check the result against what the team actually agreed to build.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="wrap">
+      <p class="eyebrow"><i></i>FAQ</p>
+      <h2>Questions, answered.</h2>
+            <div class="faq">
+        <details><summary>Is the implementation plan a separate phase?</summary><p>No. <code>om-sdd-spec</code> writes it together with the specification.</p></details>
+        <details><summary>Do I need a UX design phase?</summary><p>No. The mockup is built after the spec, from your application’s real components.</p></details>
+        <details><summary>What if the mockup changes the requirements?</summary><p>Cosmetic comments are fixed in the mockup. Anything that changes behavior goes back to the spec, which is then approved again.</p></details>
+        <details><summary>I already have requirements. Do I still run Discover?</summary><p>Yes, but it takes minutes. Discover indexes your document instead of interviewing, flags what it leaves open, and pins its version so a later change is noticed.</p></details>
+        <details><summary>Is the Secure step a penetration test?</summary><p>No. It is design-level threat modeling that produces required tests. It does not replace a penetration test for high-risk changes.</p></details>
+        <details><summary>Is it available today?</summary><p>The <code>om-sdd</code> skills are in preview and are not yet part of the public skills repository.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <p class="eyebrow"><i></i>Build with intent</p>
+      <h2>Build the right thing.<br><span>Then ship it.</span></h2>
+      <p>Nine skills, one state script, no new infrastructure.</p>
+      <a class="btn btn-green" href="https://github.com/open-mercato/skills" target="_blank" rel="noopener">See Open Mercato Skills ↗</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Back to top">
+      <svg fill="url(#om-grad)" aria-hidden="true"><use href="#om-symbol"/></svg>
+      <span>Open Mercato</span>
+    </a>
+    <span>© 2026 Open Mercato SDD · Design concept</span>
+    <nav aria-label="Footer">
+      <a href="https://openmercato.com" target="_blank" rel="noopener">openmercato.com</a>
+      <a href="https://github.com/open-mercato/skills" target="_blank" rel="noopener">Skills</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const wrap = document.getElementById('flow'), items = [...wrap.querySelectorAll('.flow li')];
+  const dots = items.map(li => li.querySelector('.dot')), panel = document.querySelector('#panel .in');
+  const vertical = matchMedia('(max-width:760px)'), calm = matchMedia('(prefers-reduced-motion:reduce)');
+  let active = -1, timer = null, visible = false, hover = false, manual = false;
+
+  function layout() {
+    const r = wrap.getBoundingClientRect();
+    const c = d => { const b = d.getBoundingClientRect(); return vertical.matches ? b.top + b.height / 2 - r.top : b.left + b.width / 2 - r.left; };
+    const a = c(dots[0]);
+    wrap.style.setProperty('--a', a + 'px');
+    wrap.style.setProperty('--len', (c(dots[dots.length - 1]) - a) + 'px');
+    wrap.style.setProperty('--p', (c(dots[Math.max(active, 0)]) - a) + 'px');
+  }
+  function show(i) {
+    if (i === active) return;
+    active = i;
+    items.forEach((li, k) => { li.classList.toggle('active', k === i); li.classList.toggle('done', k < i);
+      dots[k].setAttribute('aria-current', k === i ? 'step' : 'false'); });
+    panel.innerHTML = items[i].querySelector('.body').innerHTML;
+    panel.classList.remove('swap'); void panel.offsetWidth; panel.classList.add('swap');
+    layout();
+  }
+  function play() {
+    clearInterval(timer); timer = null;
+    if (vertical.matches || calm.matches || manual || hover || !visible) return;
+    timer = setInterval(() => show((active + 1) % items.length), 3400);
+  }
+  function onScroll() {
+    if (!vertical.matches) return;
+    let i = 0; const mid = innerHeight * 0.55;
+    dots.forEach((d, k) => { if (d.getBoundingClientRect().top < mid) i = k; });
+    show(i);
+  }
+  items.forEach((li, i) => li.addEventListener('click', () => { if (vertical.matches) return; manual = true; show(i); play(); }));
+  wrap.addEventListener('mouseenter', () => { hover = true; play(); });
+  wrap.addEventListener('mouseleave', () => { hover = false; play(); });
+  new IntersectionObserver(e => { visible = e[0].isIntersecting; play(); }, { threshold: .4 }).observe(wrap);
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', () => { layout(); onScroll(); play(); });
+  if (document.fonts) document.fonts.ready.then(layout);
+  show(0); onScroll();
+})();
+</script>
+</body>
+</html>

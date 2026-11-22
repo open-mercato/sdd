@@ -1,0 +1,12 @@
+{
+  "name": "om-sdd",
+  "version": "0.1.0-preview",
+  "private": true,
+  "type": "module",
+  "description": "Open Mercato SDD: a spec-driven development workflow for coding agents, as nine skills and one state script.",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "install-skills": "node install.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

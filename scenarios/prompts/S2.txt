@@ -1,0 +1,5 @@
+Orders list: add an Export CSV action that exports all rows matching the current filters and search (all pages, not just the visible one), with the visible columns, at most 10,000 rows with a clear message when exceeded, only for users with a new feature `orders.export`.
+
+Review comments to type into the mockup overlay:
+- cosmetic: "Put Export in the toolbar next to the column picker, secondary style, label 'Export'."
+- substantive: "Accounting needs to choose 'visible columns' or 'all columns' before export."
